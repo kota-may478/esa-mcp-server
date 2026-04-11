@@ -46,17 +46,23 @@ export default async function handler(
   // ── MCP Streamable HTTP (stateless mode) ─────────────────────────────────
   // A new server + transport instance is created per request.
   // This is the correct pattern for stateless serverless environments.
+  //
+  // enableJsonResponse: true — respond with a direct JSON body instead of an
+  // SSE stream. SSE keeps the connection open indefinitely, which causes
+  // Vercel serverless functions to hang until the 10-second timeout.
+  // JSON responses complete immediately and work correctly in serverless.
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined, // stateless — no session state between requests
+    enableJsonResponse: true,
   });
 
   const server = createServer(esaToken, esaTeam);
 
-  try {
-    await server.connect(transport);
-    // Pass req.body as parsedBody so the transport doesn't re-read the stream
-    await transport.handleRequest(req, res, req.body);
-  } finally {
-    await server.close();
-  }
+  await server.connect(transport);
+  // Pass req.body as parsedBody so the transport doesn't re-read the stream.
+  // Do NOT call server.close() after this — closing the transport before the
+  // response is flushed to the socket produces an empty response body.
+  // In a serverless function the process is discarded after the handler
+  // returns, so no explicit cleanup is needed.
+  await transport.handleRequest(req, res, req.body);
 }
