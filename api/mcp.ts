@@ -19,7 +19,17 @@ export default async function handler(
   req: RequestWithBody,
   res: ServerResponse
 ): Promise<void> {
-  // ── Bearer token authentication ──────────────────────────────────────────
+  // ── Authentication ───────────────────────────────────────────────────────
+  // Supports two methods so both Claude.ai and curl work:
+  //
+  //   1. Query parameter  ?token=<MCP_AUTH_TOKEN>
+  //      → Used when registering the URL in Claude.ai's "Add connector" UI,
+  //        e.g. https://xxx.vercel.app/api/mcp?token=<MCP_AUTH_TOKEN>
+  //        Claude.ai has no field for custom headers, so the token must be
+  //        embedded in the URL itself.
+  //
+  //   2. Authorization: Bearer <MCP_AUTH_TOKEN> header
+  //      → Useful for curl-based testing and other HTTP clients.
   const expectedToken = process.env.MCP_AUTH_TOKEN;
   if (!expectedToken) {
     res.writeHead(500, { "Content-Type": "application/json" });
@@ -27,8 +37,11 @@ export default async function handler(
     return;
   }
 
+  const urlObj = new URL(req.url ?? "/", `https://${req.headers.host}`);
+  const queryToken = urlObj.searchParams.get("token");
   const authHeader = req.headers.authorization;
-  if (authHeader !== `Bearer ${expectedToken}`) {
+
+  if (queryToken !== expectedToken && authHeader !== `Bearer ${expectedToken}`) {
     res.writeHead(401, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Unauthorized" }));
     return;
