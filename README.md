@@ -64,11 +64,11 @@ You (type in chat at claude.ai)
 │                          │  decides which tool to call
 └────────────┬─────────────┘
              │ MCP Streamable HTTP
-             │ Authorization: Bearer <MCP_AUTH_TOKEN>
+             │ https://xxx.vercel.app/api/mcp?token=<MCP_AUTH_TOKEN>
              ▼
 ┌──────────────────────────┐
 │   Vercel Serverless Fn   │  ◀──  this repository (api/mcp.ts)
-│  https://xxx.vercel.app  │  verifies auth token,
+│  https://xxx.vercel.app  │  verifies token in URL query param,
 │       /api/mcp           │  calls the esa API, returns results
 └────────────┬─────────────┘
              │ HTTPS  (esa REST API)
@@ -101,7 +101,8 @@ esa-mcp-server/
 │
 ├── api/
 │   └── mcp.ts          ← Vercel serverless function for browser Claude.
-│                          Handles HTTP requests, checks Bearer token auth,
+│                          Handles HTTP requests, verifies auth token
+│                          (query param ?token= or Bearer header),
 │                          creates the server, connects via
 │                          StreamableHTTPServerTransport.
 │
@@ -204,7 +205,9 @@ start "$env:APPDATA\Claude\claude_desktop_config.json"
 ```
 This opens the file with your default text editor (Notepad, VS Code, etc.).
 
-Add the following to the file (replace `YOUR_*` with your actual values):
+**If the file does not exist (first MCP server):** Create it as a new file and paste in the entire block below.
+
+**If the file already exists (other MCP servers are configured):** Add only the `"esa": { ... }` block inside the existing `"mcpServers"` object. Do not replace the whole file — that would remove your other MCP servers.
 
 ```json
 {
@@ -223,7 +226,7 @@ Add the following to the file (replace `YOUR_*` with your actual values):
 }
 ```
 
-**Path examples:**
+Replace `YOUR_*` with your actual values. Path examples:
 
 macOS:
 ```json
@@ -371,11 +374,23 @@ You can find your exact URL on the Vercel project dashboard.
 2. Click your profile icon → **Settings**
 3. Go to **"Integrations"** (or **"Connectors"**)
 4. Click **"Add connector"** → **"Add a custom integration"**
-5. Enter your endpoint URL: `https://<your-project-name>.vercel.app/api/mcp`
-6. Under authentication, select **"API Key"** or **"Bearer token"** and enter the `MCP_AUTH_TOKEN` value you generated in Step 3
+5. Enter your endpoint URL **with the token embedded as a query parameter**:
+   ```
+   https://<your-project-name>.vercel.app/api/mcp?token=<MCP_AUTH_TOKEN>
+   ```
+   Replace `<MCP_AUTH_TOKEN>` with the secret string you generated in Step 3.
+6. Leave the OAuth fields blank (not needed)
 7. Save
 
-Once added, the esa tools will appear in your Claude chat sessions.
+### Verifying and Using the Connector
+
+Once added, open a new chat in Claude and click the **"+"** (or the tools icon) at the bottom of the chat input area. You should see `esa-mcp-server` listed there. Enable it and then talk to Claude naturally:
+
+```
+Show me the 5 most recently updated posts.
+```
+
+> **Tool approval prompt:** The first time a tool is called, Claude may show a confirmation dialog asking for permission to run it. Click **"Allow"** to proceed.
 
 ### When You Update the Code
 
@@ -400,7 +415,7 @@ src/index.ts  ──(tsc compiles)──▶  dist/index.js  ──(node runs)─
 
 `npm run build` runs the TypeScript compiler (`tsc`) and produces `dist/index.js`.
 
-**After editing `src/index.ts`, you must always run `npm run build` before the changes take effect in Claude Desktop.**
+**After editing `src/server.ts` or `src/index.ts`, you must always run `npm run build` before the changes take effect in Claude Desktop.**
 
 ---
 
@@ -420,9 +435,9 @@ In short: use `npm run dev` while writing code, then run `npm run build` when yo
 
 ### Adding a New Tool
 
-1. Open [src/index.ts](src/index.ts)
-2. Add a tool definition in the `ListToolsRequestSchema` handler (around line 52)
-3. Add a case for the tool in the `CallToolRequestSchema` handler (around line 194)
+1. Open [src/server.ts](src/server.ts)
+2. Add a tool definition in the `ListToolsRequestSchema` handler (around line 42)
+3. Add a case for the tool in the `CallToolRequestSchema` handler (around line 184)
 4. Run `npm run build` to compile, then restart Claude Desktop
 
 ### Build
@@ -448,7 +463,7 @@ Compiles TypeScript to `dist/index.js`.
 |---|---|---|
 | `ESA_ACCESS_TOKEN` | Both modes | esa Personal Access Token v1 |
 | `ESA_TEAM_NAME` | Both modes | esa team name (`xxx` part of `xxx.esa.io`) |
-| `MCP_AUTH_TOKEN` | Remote (Vercel) only | Bearer token to protect the HTTP endpoint |
+| `MCP_AUTH_TOKEN` | Remote (Vercel) only | Secret token to protect the HTTP endpoint. Passed as `?token=` in the URL when registering the connector in Claude. |
 
 ---
 
@@ -518,11 +533,11 @@ Claude から直接 esa の記事を作成・編集・検索・管理できる M
 │                          │  呼び出すツールを決定する
 └────────────┬─────────────┘
              │ MCP Streamable HTTP
-             │ Authorization: Bearer <MCP_AUTH_TOKEN>
+             │ https://xxx.vercel.app/api/mcp?token=<MCP_AUTH_TOKEN>
              ▼
 ┌──────────────────────────┐
 │  Vercel サーバーレス関数  │  ◀──  このリポジトリ（api/mcp.ts）
-│  https://xxx.vercel.app  │  Bearer トークンを検証し、
+│  https://xxx.vercel.app  │  URL クエリパラメータのトークンを検証し、
 │       /api/mcp           │  esa API を叩いて結果を返す
 └────────────┬─────────────┘
              │ HTTPS（esa REST API）
@@ -554,7 +569,8 @@ esa-mcp-server/
 │
 ├── api/
 │   └── mcp.ts          ← ブラウザ版 Claude 用の Vercel サーバーレス関数。
-│                          HTTP リクエストを受け取り、Bearer トークン認証を行い、
+│                          HTTP リクエストを受け取り、トークン認証を行い
+│                          （URL クエリパラメータ ?token= または Bearer ヘッダー）、
 │                          StreamableHTTPServerTransport で接続。
 │
 ├── dist/               ← コンパイル済みファイル（npm run build で自動生成）
@@ -656,7 +672,9 @@ start "$env:APPDATA\Claude\claude_desktop_config.json"
 ```
 既定のテキストエディタ（メモ帳、VS Code など）でファイルが開きます。
 
-ファイルに以下を追加します（`YOUR_*` を実際の値に置き換えてください）:
+**ファイルが存在しない場合（初めて MCP サーバーを設定する場合）:** 新規ファイルとして作成し、以下のブロック全体を貼り付けてください。
+
+**ファイルがすでに存在する場合（他の MCP サーバーが設定済みの場合）:** 既存の `"mcpServers"` オブジェクトの中に `"esa": { ... }` のブロックだけを追加してください。ファイル全体を置き換えると他の MCP サーバーの設定が消えてしまいます。
 
 ```json
 {
@@ -675,7 +693,7 @@ start "$env:APPDATA\Claude\claude_desktop_config.json"
 }
 ```
 
-**パスの例:**
+`YOUR_*` を実際の値に置き換えてください。パスの例:
 
 macOS:
 ```json
@@ -821,11 +839,23 @@ https://<プロジェクト名>.vercel.app/api/mcp
 2. プロフィールアイコン → **Settings** をクリック
 3. **"Integrations"**（または **"Connectors"**）を開く
 4. **"Add connector"** → **"Add a custom integration"** をクリック
-5. エンドポイント URL を入力: `https://<プロジェクト名>.vercel.app/api/mcp`
-6. 認証設定で **"API Key"** または **"Bearer token"** を選択し、ステップ 3 で生成した `MCP_AUTH_TOKEN` の値を入力
+5. エンドポイント URL を **トークンをクエリパラメータとして含む形式** で入力:
+   ```
+   https://<プロジェクト名>.vercel.app/api/mcp?token=<MCP_AUTH_TOKEN>
+   ```
+   `<MCP_AUTH_TOKEN>` はステップ 3 で生成した秘密の文字列に置き換えてください。
+6. OAuth フィールドは空欄のままでよい（不要）
 7. 保存
 
-追加後は、Claude のチャット画面で esa ツールが使えるようになります。
+### Connector の確認と使い方
+
+追加後、Claude の新しいチャットを開いてチャット入力欄下部の **「+」**（またはツールアイコン）をクリックします。そこに `esa-mcp-server` が表示されていれば成功です。有効にして、あとは自然に話しかけるだけです:
+
+```
+最近更新された記事を5件見せて。
+```
+
+> **ツール承認ダイアログ:** 初回のツール呼び出し時に、Claude から実行許可を求める確認ダイアログが表示されることがあります。**「Allow」** をクリックして進んでください。
 
 ### コードを更新したとき
 
@@ -850,7 +880,7 @@ src/index.ts  ──（tsc がコンパイル）──▶  dist/index.js  ──
 
 `npm run build` を実行すると TypeScript コンパイラ（`tsc`）が動き、`dist/index.js` が生成されます。
 
-**`src/index.ts` を編集したら、必ず `npm run build` を実行してください。それをしないと Claude Desktop に変更が反映されません。**
+**`src/server.ts` または `src/index.ts` を編集したら、必ず `npm run build` を実行してください。それをしないと Claude Desktop に変更が反映されません。**
 
 ---
 
@@ -870,9 +900,9 @@ src/index.ts  ──（tsc がコンパイル）──▶  dist/index.js  ──
 
 ### ツールを追加する方法
 
-1. [src/index.ts](src/index.ts) を開く
-2. `ListToolsRequestSchema` ハンドラー（約 52 行目付近）にツール定義を追加する
-3. `CallToolRequestSchema` ハンドラー（約 194 行目付近）に対応する `case` を追加する
+1. [src/server.ts](src/server.ts) を開く
+2. `ListToolsRequestSchema` ハンドラー（約 42 行目付近）にツール定義を追加する
+3. `CallToolRequestSchema` ハンドラー（約 184 行目付近）に対応する `case` を追加する
 4. `npm run build` を実行してコンパイルし、Claude Desktop を再起動する
 
 ### ビルド
@@ -898,4 +928,4 @@ TypeScript を `dist/index.js` にコンパイルします。
 |---|---|---|
 | `ESA_ACCESS_TOKEN` | 両モード | esa Personal Access Token v1 |
 | `ESA_TEAM_NAME` | 両モード | esa チーム名（`xxx.esa.io` の `xxx` 部分） |
-| `MCP_AUTH_TOKEN` | リモート（Vercel）のみ | HTTP エンドポイントを保護する Bearer トークン |
+| `MCP_AUTH_TOKEN` | リモート（Vercel）のみ | HTTP エンドポイントを保護する秘密のトークン。Connector 登録時は URL の `?token=` として渡す |
