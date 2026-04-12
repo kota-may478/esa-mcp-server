@@ -2,7 +2,7 @@
 
 # esa MCP Server
 
-An MCP (Model Context Protocol) server that lets you create, edit, search, and manage esa posts directly from Claude — no browser required.
+An MCP (Model Context Protocol) server that lets you create, edit, search, and manage esa posts directly from Claude. After finishing your work in Claude, you can skip the usual cycle of "ask Claude to summarize → open esa → create a post → copy and paste" and update esa without ever leaving Claude.
 
 Two usage modes are supported:
 
@@ -127,7 +127,16 @@ These two directories are **not stored in the repository** and must be generated
 
 ---
 
-## Setup
+## Choose Your Setup Path
+
+| I use… | Setup path |
+|---|---|
+| **Claude Desktop** (desktop app) | [Setup: Local Mode →](#setup-local-mode--claude-desktop) |
+| **Claude on claude.ai** (browser) | [Setup: Remote Mode →](#setup-remote-mode--claudeai-via-vercel) |
+
+---
+
+## Setup: Local Mode — Claude Desktop
 
 ### Step 1 — Get an esa Access Token
 
@@ -316,7 +325,7 @@ type "$env:APPDATA\Claude\logs\mcp-server-esa.log"
 
 ---
 
-## Remote Deployment (Vercel)
+## Setup: Remote Mode — claude.ai (via Vercel)
 
 Deploy your own instance to Vercel to use the esa MCP server from the **browser version of Claude** (claude.ai) via Add connector.
 
@@ -471,7 +480,7 @@ Compiles TypeScript to `dist/index.js`.
 
 # esa MCP サーバー
 
-Claude から直接 esa の記事を作成・編集・検索・管理できる MCP（Model Context Protocol）サーバーです。ブラウザを開かなくても esa を操作できます。
+Claude から直接 esa の記事を作成・編集・検索・管理できる MCP（Model Context Protocol）サーバーです。Claude で作業をした後に「Claude に情報をまとめてもらう → esa のページを開く → 記事を作成してコピペする」という手順を踏まずに、快適に esa を更新できます。
 
 2つの利用モードに対応しています:
 
@@ -594,7 +603,16 @@ esa-mcp-server/
 
 ---
 
-## セットアップ
+## セットアップ — どちらを使いますか？
+
+| 使っているクライアント | セットアップ |
+|---|---|
+| **Claude Desktop**（デスクトップアプリ） | [ローカルモードのセットアップ →](#セットアップ--ローカルモード--claude-desktop) |
+| **claude.ai**（ブラウザ） | [リモートモードのセットアップ →](#セットアップ--リモートモード--claudeai-via-vercel) |
+
+---
+
+## セットアップ — ローカルモード — Claude Desktop
 
 ### ステップ 1 — esa アクセストークンの取得
 
@@ -781,7 +799,7 @@ type "$env:APPDATA\Claude\logs\mcp-server-esa.log"
 
 ---
 
-## リモートデプロイ（Vercel）
+## セットアップ — リモートモード — claude.ai（via Vercel）
 
 Vercel に自分専用のインスタンスをデプロイすることで、**ブラウザ版 Claude**（claude.ai）の Add connector から esa ツールを使えるようになります。
 
