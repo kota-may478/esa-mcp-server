@@ -129,10 +129,13 @@ These two directories are **not stored in the repository** and must be generated
 
 ## Choose Your Setup Path
 
-| I use… | Setup path |
-|---|---|
-| **Claude Desktop** (desktop app) | [Setup: Local Mode →](#setup-local-mode--claude-desktop) |
-| **Claude on claude.ai** (browser) | [Setup: Remote Mode →](#setup-remote-mode--claudeai-via-vercel) |
+<table>
+<tr><th colspan="2" align="center">Which client are you using?</th></tr>
+<tr>
+<th align="center"><a href="#setup-local-mode--claude-desktop">Claude Desktop<br>(desktop app)</a></th>
+<th align="center"><a href="#setup-remote-mode--claudeai-via-vercel">claude.ai<br>(browser)</a></th>
+</tr>
+</table>
 
 ---
 
@@ -605,10 +608,13 @@ esa-mcp-server/
 
 ## セットアップ — どちらを使いますか？
 
-| 使っているクライアント | セットアップ |
-|---|---|
-| **Claude Desktop**（デスクトップアプリ） | [ローカルモードのセットアップ →](#セットアップ--ローカルモード--claude-desktop) |
-| **claude.ai**（ブラウザ） | [リモートモードのセットアップ →](#セットアップ--リモートモード--claudeai-via-vercel) |
+<table>
+<tr><th colspan="2" align="center">使っているクライアント</th></tr>
+<tr>
+<th align="center"><a href="#セットアップ--ローカルモード--claude-desktop">Claude Desktop<br>（デスクトップアプリ）</a></th>
+<th align="center"><a href="#セットアップ--リモートモード--claudeai-via-vercel">claude.ai<br>（ブラウザ）</a></th>
+</tr>
+</table>
 
 ---
 
@@ -799,7 +805,7 @@ type "$env:APPDATA\Claude\logs\mcp-server-esa.log"
 
 ---
 
-## セットアップ — リモートモード — claude.ai（via Vercel）
+## セットアップ — リモートモード — claude.ai （via Vercel）
 
 Vercel に自分専用のインスタンスをデプロイすることで、**ブラウザ版 Claude**（claude.ai）の Add connector から esa ツールを使えるようになります。
 
